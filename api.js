@@ -85,7 +85,7 @@ if (document.getElementById('letterForm')) {
         
         if (result) {
             // Display the generated letter
-            document.getElementById('letterPreview').value = result.letter || 'محتوى الخطاب المُنشأ سيظهر هنا...';
+            document.getElementById('letterPreview').value = result.Letter || 'محتوى الخطاب المُنشأ سيظهر هنا...';
             document.getElementById('previewSection').style.display = 'block';
             
             // Store the generated letter data
