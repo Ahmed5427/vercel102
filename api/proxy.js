@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
         const contentType = req.headers["content-type"] || "";
         
         if (contentType.includes("multipart/form-data")) {
-            const form = formidable({
+            const form = new formidable.IncomingForm({
                 multiples: true,
                 keepExtensions: true,
             });
@@ -52,7 +52,12 @@ module.exports = async (req, res) => {
 
                 // Append fields
                 for (const key in fields) {
-                    formData.append(key, fields[key]);
+                    // formidable returns fields as arrays, so handle accordingly
+                    if (Array.isArray(fields[key])) {
+                        fields[key].forEach(value => formData.append(key, value));
+                    } else {
+                        formData.append(key, fields[key]);
+                    }
                 }
 
                 // Append files
