@@ -48,17 +48,11 @@ async function generateLetter(formData) {
 }
 
 // Archive Letter API
-async function archiveLetter(letterData) {
+async function archiveLetter(formData) {
     try {
         const response = await fetch('/api/proxy', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                endpoint: 'archive-letter',
-                data: letterData
-            })
+            body: formData // Send FormData directly, don't set Content-Type header
         });
         
         if (!response.ok) {
@@ -74,7 +68,6 @@ async function archiveLetter(letterData) {
         return null;
     }
 }
-
 // Form submission handler
 if (document.getElementById('letterForm')) {
     document.getElementById('letterForm').addEventListener('submit', async (e) => {
@@ -100,24 +93,55 @@ if (document.getElementById('saveButton')) {
         const letterContent = document.getElementById('letterPreview').value;
         const selectedTemplate = document.querySelector('input[name="template"]:checked').value;
         
-        // Prepare archive data
-        const archiveData = {
-            file: 'letter.pdf', // This would be generated based on template
-            letter_content: letterContent,
-            letter_type: document.getElementById('letterType').value,
-            recipient: document.getElementById('recipient').value,
-            title: document.getElementById('letterTitle').value,
-            is_first: document.querySelector('input[name="isFirst"]:checked').value,
-            ID: generateUniqueId()
-        };
+        // Generate PDF from letter content
+        const pdfBlob = await generatePDF(letterContent, selectedTemplate);
         
-        const result = await archiveLetter(archiveData);
+        // Prepare archive data as FormData
+        const formData = new FormData();
+        formData.append('file', pdfBlob, 'letter.pdf');
+        formData.append('letter_content', letterContent);
+        formData.append('letter_type', document.getElementById('letterType').value);
+        formData.append('recipient', document.getElementById('recipient').value);
+        formData.append('title', document.getElementById('letterTitle').value);
+        formData.append('is_first', document.querySelector('input[name="isFirst"]:checked').value);
+        formData.append('ID', generateUniqueId());
+        
+        const result = await archiveLetter(formData);
         
         if (result) {
             alert('تم حفظ الخطاب بنجاح!');
             window.location.href = '/';
         }
     });
+}
+
+async function generatePDF(content, template) {
+    try {
+        // Create a simple PDF using jsPDF library
+        // For now, we'll create a simple text-based PDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Set Arabic font support (if available)
+        doc.setFont('helvetica');
+        doc.setFontSize(12);
+        
+        // Split content into lines to fit page width
+        const lines = doc.splitTextToSize(content, 180);
+        
+        // Add content to PDF
+        doc.text(lines, 15, 20);
+        
+        // Convert to blob
+        const pdfBlob = doc.output('blob');
+        return pdfBlob;
+        
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        // Fallback: create a simple text file as blob
+        const textBlob = new Blob([content], { type: 'text/plain' });
+        return textBlob;
+    }
 }
 
 // Generate unique ID
