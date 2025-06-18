@@ -100,7 +100,15 @@ if (document.getElementById('saveButton')) {
         formData.append('letter_content', letterContent);
         formData.append('letter_type', document.getElementById('letterType').value);
         formData.append('recipient', document.getElementById('recipient').value);
-        formData.append('title', document.getElementById('letterTitle').value);
+        
+        // Use the title from the generated letter data
+        if (window.generatedLetterData && window.generatedLetterData.title) {
+            formData.append('title', window.generatedLetterData.title);
+        } else {
+            // Fallback if title is not available from generated data
+            formData.append('title', 'Untitled Letter'); 
+        }
+
         formData.append('is_first', document.querySelector('input[name="isFirst"]:checked').value);
         formData.append('ID', generateUniqueId());
         
