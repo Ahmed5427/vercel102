@@ -130,29 +130,34 @@ if (document.getElementById('saveButton')) {
 
 async function generatePDF(content, template) {
     try {
-        // Create a simple PDF using jsPDF library
-        // For now, we'll create a simple text-based PDF
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        
-        // Set Arabic font support (if available)
-        doc.setFont('helvetica');
+
+        // Base64 encoded Amiri-Regular.ttf font data
+        // YOU NEED TO REPLACE THIS WITH THE ACTUAL BASE64 STRING OF YOUR FONT
+        const AMIRI_FONT_BASE64 = "BASE64_ENCODED_AMIRI_FONT"; 
+
+        // Add the font to jsPDF
+        doc.addFileToVFS("Amiri-Regular.ttf", AMIRI_FONT_BASE64);
+        doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
+
+        // Set the font for the document
+        doc.setFont("Amiri");
         doc.setFontSize(12);
-        
+
         // Split content into lines to fit page width
         const lines = doc.splitTextToSize(content, 180);
-        
+
         // Add content to PDF
         doc.text(lines, 15, 20);
-        
+
         // Convert to blob
-        const pdfBlob = doc.output('blob');
+        const pdfBlob = doc.output("blob");
         return pdfBlob;
-        
     } catch (error) {
-        console.error('Error generating PDF:', error);
+        console.error("Error generating PDF:", error);
         // Fallback: create a simple text file as blob
-        const textBlob = new Blob([content], { type: 'text/plain' });
+        const textBlob = new Blob([content], { type: "text/plain" });
         return textBlob;
     }
 }
@@ -162,4 +167,3 @@ function generateUniqueId() {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 15);
     return `${timestamp}-${random}`;
-}
