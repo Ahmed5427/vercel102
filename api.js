@@ -10,12 +10,10 @@ async function generateLetter(formData) {
         // Prepare the payload
         const payload = {
             category: formData.get('category'),
-            sub_category: formData.get('sub_category'),
-            title: formData.get('title'),
             recipient: formData.get('recipient'),
             isFirst: formData.get('isFirst') === 'true',
             prompt: formData.get('prompt'),
-            tone: formData.get('tone')
+            member_name: formData.get('member_name')
         };
         
         // Since we can't directly call HTTPS with self-signed cert from browser,
