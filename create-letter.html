@@ -154,15 +154,14 @@
             const recipientTitleSelect = document.getElementById("recipientTitle");
             const otherRecipientTitleInput = document.getElementById("otherRecipientTitle");
 
-            // Populate recipientTitleSelect from sheets.js (assuming a function like loadRecipientTitles exists)
-            // For now, hardcode options for demonstration
-            const titles = ["سعادة", "معالي", "صاحب السمو", "أخرى"]; // Example titles from column C
-            titles.forEach(title => {
-                const option = document.createElement("option");
-                option.value = title;
-                option.textContent = title;
-                recipientTitleSelect.appendChild(option);
-            });
+            // This part is now handled by sheets.js
+            // const titles = ["سعادة", "معالي", "صاحب السمو", "أخرى"]; // Example titles from column C
+            // titles.forEach(title => {
+            //     const option = document.createElement("option");
+            //     option.value = title;
+            //     option.textContent = title;
+            //     recipientTitleSelect.appendChild(option);
+            // });
 
             recipientTitleSelect.addEventListener("change", function() {
                 if (this.value === "أخرى") {
@@ -178,5 +177,3 @@
     </script>
 </body>
 </html>
-
-
