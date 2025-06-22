@@ -29,19 +29,19 @@ async function loadSettings() {
 function processSettings(settings) {
     const processed = {
         letterTypes: [],
-        purposes: [],
+        recipientTitles: [], // For "لقب المرسل إليه"
         styles: []
     };
     
     settings.forEach(row => {
         if (row[1]) processed.letterTypes.push(row[1]); // Column B
-        if (row[2]) processed.purposes.push(row[2]); // Column C
+        if (row[2]) processed.recipientTitles.push(row[2]); // Column C
         if (row[6]) processed.styles.push(row[6]); // Column G
     });
     
     // Remove duplicates
     processed.letterTypes = [...new Set(processed.letterTypes)];
-    processed.purposes = [...new Set(processed.purposes)];
+    processed.recipientTitles = [...new Set(processed.recipientTitles)];
     processed.styles = [...new Set(processed.styles)];
     
     return processed;
@@ -97,14 +97,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 letterTypeSelect.appendChild(option);
             });
             
-            // Populate purpose dropdown
-            const purposeSelect = document.getElementById('letterPurpose');
-            settings.purposes.forEach(purpose => {
-                const option = document.createElement('option');
-                option.value = purpose;
-                option.textContent = purpose;
-                purposeSelect.appendChild(option);
-            });
+            // Populate recipient title dropdown
+            const recipientTitleSelect = document.getElementById('recipientTitle');
+            if (recipientTitleSelect) {
+                settings.recipientTitles.forEach(title => {
+                    const option = document.createElement('option');
+                    option.value = title;
+                    option.textContent = title;
+                    recipientTitleSelect.appendChild(option);
+                });
+                // Add the 'أخرى' option
+                const otherOption = document.createElement('option');
+                otherOption.value = 'أخرى';
+                otherOption.textContent = 'أخرى';
+                recipientTitleSelect.appendChild(otherOption);
+            }
             
             // Populate style dropdown
             const styleSelect = document.getElementById('letterStyle');
@@ -117,3 +124,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 });
+
+
