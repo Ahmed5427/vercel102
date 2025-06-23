@@ -132,7 +132,7 @@ function setupFilters(letters) {
 
 // Letter Actions
 function reviewLetter(id) {
-    window.location.href = `/src/pages/review-letter.html?id=${id}`;
+    window.location.href = `review-letter.html?id=${id}`;
 }
 
 function printLetter(id) {
