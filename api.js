@@ -7,6 +7,14 @@ async function generateLetter(formData) {
     loader.classList.add('active');
     
     try {
+        // Determine the recipient_title to send
+        let finalRecipientTitle = formData.get('recipient_title');
+        const otherRecipientTitle = formData.get('other_recipient_title');
+
+        if (finalRecipientTitle === 'أخرى' && otherRecipientTitle) {
+            finalRecipientTitle = otherRecipientTitle;
+        }
+
         // Prepare the payload
         const payload = {
             category: formData.get('category'),
@@ -18,8 +26,7 @@ async function generateLetter(formData) {
             member_name: formData.get('member_name'),
             organization_name: formData.get('organization_name'), // New field
             recipient_job_title: formData.get('recipient_job_title'), // New field
-            recipient_title: formData.get('recipient_title'), // New field
-            other_recipient_title: formData.get('other_recipient_title') // New field for 'other' option
+            recipient_title: finalRecipientTitle, // Updated logic for recipient_title
         };
         
         // Since we can't directly call HTTPS with self-signed cert from browser,
@@ -136,23 +143,29 @@ if (document.getElementById('saveButton')) {
 
 async function generatePDF(content, template) {
     try {
-        // Create a simple PDF using jsPDF library
-        // For now, we'll create a simple text-based PDF
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
-        // Set Arabic font support (if available)
-        doc.setFont('helvetica');
+        // Base64 encoded Amiri-Regular.ttf font data
+        // YOU NEED TO REPLACE THIS WITH THE ACTUAL BASE64 STRING OF YOUR FONT
+        const AMIRI_FONT_BASE64 = "BASE64_ENCODED_AMIRI_FONT"; 
+
+        // Add the font to jsPDF
+        doc.addFileToVFS("Amiri-Regular.ttf", AMIRI_FONT_BASE64);
+        doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
+
+        // Set the font for the document
+        doc.setFont("Amiri");
         doc.setFontSize(12);
-        
+
         // Split content into lines to fit page width
         const lines = doc.splitTextToSize(content, 180);
-        
+
         // Add content to PDF
         doc.text(lines, 15, 20);
-        
+
         // Convert to blob
-        const pdfBlob = doc.output('blob');
+        const pdfBlob = doc.output("blob");
         return pdfBlob;
         
     } catch (error) {
