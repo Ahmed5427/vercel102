@@ -158,13 +158,28 @@ function deleteLetter(id) {
 function loadLettersForReview() {
     const letterSelect = document.getElementById('letterSelect');
     
+    // Check if we have a letter ID in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const preselectedId = urlParams.get('id');
+    
     loadSubmissionsData().then(letters => {
+        // Clear existing options first
+        letterSelect.innerHTML = '<option value="">اختر خطاباً</option>';
+        
         letters.forEach(letter => {
             const option = document.createElement('option');
             option.value = letter.id;
             option.textContent = `${letter.id} - ${letter.recipient} - ${letter.subject}`;
             letterSelect.appendChild(option);
         });
+        
+        // If there's a preselected ID from URL, select it and load the letter
+        if (preselectedId) {
+            letterSelect.value = preselectedId;
+            const reviewForm = document.getElementById('reviewForm');
+            reviewForm.style.display = 'block';
+            loadLetterForReview(preselectedId);
+        }
     });
 }
 
@@ -191,15 +206,27 @@ function setupReviewForm() {
     
     // Setup action buttons
     document.getElementById('readyButton').addEventListener('click', () => updateReviewStatus('جاهز للإرسال'));
-        document.getElementById('improvementButton').addEventListener('click', () => updateReviewStatus('يحتاج إلى تحسينات'));
+    document.getElementById('improvementButton').addEventListener('click', () => updateReviewStatus('يحتاج إلى تحسينات'));
     document.getElementById('rejectedButton').addEventListener('click', () => updateReviewStatus('مرفوض'));
 }
 
 function loadLetterForReview(id) {
     // Load letter content from your data source
-    // For now, we'll use placeholder content
-    const letterContent = document.getElementById('letterContentReview');
-    letterContent.value = 'محتوى الخطاب سيظهر هنا...';
+    loadSubmissionsData().then(letters => {
+        const letter = letters.find(l => l.id === id);
+        const letterContent = document.getElementById('letterContentReview');
+        
+        if (letter) {
+            // Display the actual letter content
+            letterContent.value = letter.content || 'محتوى الخطاب غير متوفر';
+        } else {
+            letterContent.value = 'لم يتم العثور على الخطاب';
+        }
+    }).catch(error => {
+        console.error('Error loading letter:', error);
+        const letterContent = document.getElementById('letterContentReview');
+        letterContent.value = 'حدث خطأ في تحميل محتوى الخطاب';
+    });
 }
 
 function updateReviewStatus(status) {
