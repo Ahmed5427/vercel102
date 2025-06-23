@@ -77,9 +77,22 @@ function processSubmissions(submissions) {
         type: row[3] || '',
         recipient: row[4] || '',
         subject: row[5] || '',
+        content: row[6] || '', // Add content field (Column G)
         reviewStatus: row[9] || 'في الانتظار',
         sendStatus: row[10] || 'في الانتظار'
     }));
+}
+
+// Load specific letter content by ID
+async function loadLetterContent(letterId) {
+    try {
+        const submissions = await loadSubmissionsData();
+        const letter = submissions.find(l => l.id === letterId);
+        return letter ? letter.content : null;
+    } catch (error) {
+        console.error('Error loading letter content:', error);
+        return null;
+    }
 }
 
 // Populate dropdowns on page load
@@ -124,5 +137,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 });
-
-
