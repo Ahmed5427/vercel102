@@ -1,7 +1,10 @@
-// Google Sheets API Configuration
+// Google Sheets API Configuration (for read-only operations)
 const SPREADSHEET_ID = '1cLbTgbluZyWYHRouEgqHQuYQqKexHhu4st9ANzuaxGk';
 const API_KEY = 'AIzaSyBqF-nMxyZMrjmdFbULO9I_j75hXXaiq4A';
 const SHEETS_API_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
+
+// NEW: Your Google Apps Script Web App URL
+const APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwogQ-TjiCqZoY_aCMjYpR_i5jmDHxmd0ZmihIF4lNTQVvFkBTSuFxnLa2mV5sAe0-CCw/exec'; // REPLACE THIS WITH THE URL YOU COPIED FROM APPS SCRIPT DEPLOYMENT
 
 // Load settings from Google Sheets
 async function loadSettings() {
@@ -47,7 +50,7 @@ function processSettings(settings) {
     return processed;
 }
 
-// Load submissions data
+// Load submissions data (still uses API key for read-only)
 async function loadSubmissionsData() {
     try {
         const range = 'Submissions!A:N'; // Updated range to include columns M and N
@@ -85,66 +88,52 @@ function processSubmissions(submissions) {
     }));
 }
 
-// Update review status in Google Sheets
-async function updateReviewStatusInSheet(letterId, status, reviewerName, reviewNotes) {
+// Update review status in Google Sheets using Apps Script
+async function updateReviewStatusInSheet(letterId, status, reviewerName, notes) {
     try {
-        const submissions = await loadSubmissionsData();
-        const rowIndex = submissions.findIndex(letter => letter.id === letterId) + 2; // +2 for header row and 0-based index
-        
-        if (rowIndex === 1) { // Letter not found
-            console.error('Letter not found for update:', letterId);
-            return;
-        }
-
-        // Prepare data for update (status in column J (index 9), reviewer name in M (index 12), notes in N (index 13))
-        const values = [
-            [status, '', '', reviewerName, reviewNotes] // J, K, L, M, N
-        ];
-        const range = `Submissions!J${rowIndex}:N${rowIndex}`;
-
-        const url = `${SHEETS_API_BASE}/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}&valueInputOption=USER_ENTERED`;
-        const response = await fetch(url, {
-            method: 'PUT',
+        const response = await fetch(APPS_SCRIPT_WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Required for cross-origin requests to Apps Script
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-www-form-urlencoded', // Required for e.parameter in Apps Script
             },
-            body: JSON.stringify({ values })
+            body: new URLSearchParams({
+                action: 'updateReviewStatus',
+                letterId: letterId,
+                status: status,
+                reviewerName: reviewerName,
+                notes: notes
+            })
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        console.log('Review status updated successfully!');
+        // Note: When using 'no-cors', response.ok will always be true, and you can't read the response body.
+        // You'll rely on the Apps Script execution to confirm success.
+        console.log('Request to update review status sent to Apps Script.');
     } catch (error) {
-        console.error('Error updating review status:', error);
+        console.error('Error sending update review status request to Apps Script:', error);
+        throw error; // Re-throw to be caught by the calling function in main.js
     }
 }
 
-// Delete letter from Google Sheets
+// Delete letter from Google Sheets using Apps Script
 async function deleteLetterFromSheet(letterId) {
     try {
-        const submissions = await loadSubmissionsData();
-        const rowIndex = submissions.findIndex(letter => letter.id === letterId) + 2; // +2 for header row and 0-based index
-
-        if (rowIndex === 1) { // Letter not found
-            console.error('Letter not found for deletion:', letterId);
-            return;
-        }
-
-        const url = `${SHEETS_API_BASE}/${SPREADSHEET_ID}/values/Submissions!A${rowIndex}:N${rowIndex}:clear?key=${API_KEY}`;
-        const response = await fetch(url, {
+        const response = await fetch(APPS_SCRIPT_WEB_APP_URL, {
             method: 'POST',
+            mode: 'no-cors', // Required for cross-origin requests to Apps Script
             headers: {
-                'Content-Type': 'application/json'
-            }
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'deleteLetter',
+                letterId: letterId
+            })
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        console.log('Letter deleted successfully!');
+        console.log('Request to delete letter sent to Apps Script.');
     } catch (error) {
-        console.error('Error deleting letter:', error);
+        console.error('Error sending delete letter request to Apps Script:', error);
+        throw error; // Re-throw to be caught by the calling function in main.js
     }
 }
 
@@ -190,3 +179,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 });
+
+
