@@ -60,6 +60,8 @@ function renderLettersTable(letters) {
             <td><span class="status-badge ${sendStatusClass}">${letter.sendStatus}</span></td>
             <td>${letter.recipient}</td>
             <td>${letter.subject}</td>
+            <td>${letter.reviewerName || '-'}</td>
+            <td>${letter.reviewNotes || '-'}</td>
             <td>
                 <div class="action-buttons">
                     <button class="action-icon" onclick="reviewLetter('${letter.id}')" title="مراجعة">
@@ -146,11 +148,18 @@ function downloadLetter(id) {
     alert('جاري تحميل الخطاب...');
 }
 
-function deleteLetter(id) {
+async function deleteLetter(id) {
     if (confirm('هل أنت متأكد من حذف هذا الخطاب؟')) {
-        // Implement delete functionality
-        alert('تم حذف الخطاب بنجاح');
-        loadLetterHistory();
+        try {
+            // Delete from Google Sheets
+            await deleteLetterFromSheet(id);
+            alert('تم حذف الخطاب بنجاح');
+            // Reload the letter history to reflect changes
+            loadLetterHistory();
+        } catch (error) {
+            console.error('Error deleting letter:', error);
+            alert('حدث خطأ أثناء حذف الخطاب');
+        }
     }
 }
 
@@ -215,10 +224,15 @@ function loadLetterForReview(id) {
     loadSubmissionsData().then(letters => {
         const letter = letters.find(l => l.id === id);
         const letterContent = document.getElementById('letterContentReview');
+        const reviewerNameInput = document.getElementById('reviewerName');
+        const reviewNotesInput = document.getElementById('reviewNotes');
         
         if (letter) {
             // Display the actual letter content
             letterContent.value = letter.content || 'محتوى الخطاب غير متوفر';
+            // Pre-fill reviewer name and notes if they exist
+            reviewerNameInput.value = letter.reviewerName || '';
+            reviewNotesInput.value = letter.reviewNotes || '';
         } else {
             letterContent.value = 'لم يتم العثور على الخطاب';
         }
@@ -229,7 +243,7 @@ function loadLetterForReview(id) {
     });
 }
 
-function updateReviewStatus(status) {
+async function updateReviewStatus(status) {
     const reviewerName = document.getElementById('reviewerName').value;
     const notes = document.getElementById('reviewNotes').value;
     const letterId = document.getElementById('letterSelect').value;
@@ -239,9 +253,15 @@ function updateReviewStatus(status) {
         return;
     }
     
-    // Update the status in your data source
-    alert(`تم تحديث حالة المراجعة إلى: ${status}`);
-    
-    // Redirect to home
-    window.location.href = '/';
+    try {
+        // Update the status in Google Sheets
+        await updateReviewStatusInSheet(letterId, status, reviewerName, notes);
+        alert(`تم تحديث حالة المراجعة إلى: ${status}`);
+        
+        // Redirect to letter history
+        window.location.href = 'letter-history.html';
+    } catch (error) {
+        console.error('Error updating review status:', error);
+        alert('حدث خطأ أثناء تحديث حالة المراجعة');
+    }
 }
