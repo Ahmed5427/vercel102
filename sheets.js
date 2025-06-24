@@ -50,7 +50,7 @@ function processSettings(settings) {
 // Load submissions data
 async function loadSubmissionsData() {
     try {
-        const range = 'Submissions!A:K';
+        const range = 'Submissions!A:N'; // Updated range to include columns M and N
         const url = `${SHEETS_API_BASE}/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
         
         const response = await fetch(url);
@@ -77,21 +77,74 @@ function processSubmissions(submissions) {
         type: row[3] || '',
         recipient: row[4] || '',
         subject: row[5] || '',
-        content: row[6] || '', // Add content field (Column G)
+        content: row[6] || '', // Column G
         reviewStatus: row[9] || 'في الانتظار',
-        sendStatus: row[10] || 'في الانتظار'
+        sendStatus: row[10] || 'في الانتظار',
+        reviewerName: row[12] || '', // Column M
+        reviewNotes: row[13] || '' // Column N
     }));
 }
 
-// Load specific letter content by ID
-async function loadLetterContent(letterId) {
+// Update review status in Google Sheets
+async function updateReviewStatusInSheet(letterId, status, reviewerName, reviewNotes) {
     try {
         const submissions = await loadSubmissionsData();
-        const letter = submissions.find(l => l.id === letterId);
-        return letter ? letter.content : null;
+        const rowIndex = submissions.findIndex(letter => letter.id === letterId) + 2; // +2 for header row and 0-based index
+        
+        if (rowIndex === 1) { // Letter not found
+            console.error('Letter not found for update:', letterId);
+            return;
+        }
+
+        // Prepare data for update (status in column J (index 9), reviewer name in M (index 12), notes in N (index 13))
+        const values = [
+            [status, '', '', reviewerName, reviewNotes] // J, K, L, M, N
+        ];
+        const range = `Submissions!J${rowIndex}:N${rowIndex}`;
+
+        const url = `${SHEETS_API_BASE}/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}&valueInputOption=USER_ENTERED`;
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ values })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        console.log('Review status updated successfully!');
     } catch (error) {
-        console.error('Error loading letter content:', error);
-        return null;
+        console.error('Error updating review status:', error);
+    }
+}
+
+// Delete letter from Google Sheets
+async function deleteLetterFromSheet(letterId) {
+    try {
+        const submissions = await loadSubmissionsData();
+        const rowIndex = submissions.findIndex(letter => letter.id === letterId) + 2; // +2 for header row and 0-based index
+
+        if (rowIndex === 1) { // Letter not found
+            console.error('Letter not found for deletion:', letterId);
+            return;
+        }
+
+        const url = `${SHEETS_API_BASE}/${SPREADSHEET_ID}/values/Submissions!A${rowIndex}:N${rowIndex}:clear?key=${API_KEY}`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        console.log('Letter deleted successfully!');
+    } catch (error) {
+        console.error('Error deleting letter:', error);
     }
 }
 
