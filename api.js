@@ -17,12 +17,11 @@ async function generateLetter(formData) {
 
         // Prepare the payload
         const payload = {
-            category: formData.get('category'),
-            sub_category: formData.get('sub_category'), // Now a text field
+            type: formData.get('type'),
+            category: formData.get('category'), // Now a text field
             recipient: formData.get('recipient'),
             isFirst: formData.get('isFirst') === 'true',
             prompt: formData.get('prompt'),
-            tone: formData.get('tone'),
             member_name: formData.get('member_name'),
             organization_name: formData.get('organization_name'), // New field
             recipient_job_title: formData.get('recipient_job_title'), // New field
