@@ -17,8 +17,8 @@ async function generateLetter(formData) {
 
         // Prepare the payload
         const payload = {
-            type: formData.get('type'),
-            category: formData.get('category'), // Now a text field
+            category: formData.get('category'),
+            title: formData.get('title'), // Now a text field
             recipient: formData.get('recipient'),
             isFirst: formData.get('isFirst') === 'true',
             prompt: formData.get('prompt'),
@@ -31,6 +31,17 @@ async function generateLetter(formData) {
         const memberName = formData.get('member_name');
         if (memberName && memberName.trim() !== '') {
             payload.member_name = memberName;
+        }
+
+        // Handle previous letter content for follow-up letters
+        const previousLetterId = formData.get('previous_letter_id');
+        if (previousLetterId && previousLetterId.trim() !== '') {
+            const previousLetterSelect = document.getElementById('previousLetter');
+            const selectedOption = previousLetterSelect.querySelector(`option[value="${previousLetterId}"]`);
+            if (selectedOption && selectedOption.dataset.content) {
+                payload.previous_letter_content = selectedOption.dataset.content;
+                payload.previous_letter_id = previousLetterId;
+            }
         }
         
         // Since we can't directly call HTTPS with self-signed cert from browser,
