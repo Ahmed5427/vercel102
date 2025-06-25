@@ -22,11 +22,16 @@ async function generateLetter(formData) {
             recipient: formData.get('recipient'),
             isFirst: formData.get('isFirst') === 'true',
             prompt: formData.get('prompt'),
-            member_name: formData.get('member_name'),
             organization_name: formData.get('organization_name'), // New field
             recipient_job_title: formData.get('recipient_job_title'), // New field
             recipient_title: finalRecipientTitle, // Updated logic for recipient_title
         };
+
+        // Only include member_name if a value is selected
+        const memberName = formData.get('member_name');
+        if (memberName && memberName.trim() !== '') {
+            payload.member_name = memberName;
+        }
         
         // Since we can't directly call HTTPS with self-signed cert from browser,
         // we'll use a proxy endpoint
