@@ -51,6 +51,13 @@
                         </select>
                     </div>
 
+                    <div class="form-group" id="previousLetterGroup" style="display: none;">
+                        <label for="previousLetter">الخطاب السابق <span class="required">*</span></label>
+                        <select id="previousLetter" name="previous_letter_id">
+                            <option value="">اختر الخطاب السابق</option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label for="letterPurpose">الغرض من الخطاب <span class="required">*</span></label>
                         <input type="text" id="letterPurpose" name="category" required> <!-- Changed to text field -->
@@ -153,16 +160,11 @@
         document.addEventListener("DOMContentLoaded", function() {
             const recipientTitleSelect = document.getElementById("recipientTitle");
             const otherRecipientTitleInput = document.getElementById("otherRecipientTitle");
+            const letterTypeSelect = document.getElementById("letterType");
+            const previousLetterGroup = document.getElementById("previousLetterGroup");
+            const previousLetterSelect = document.getElementById("previousLetter");
 
-            // This part is now handled by sheets.js
-            // const titles = ["سعادة", "معالي", "صاحب السمو", "أخرى"]; // Example titles from column C
-            // titles.forEach(title => {
-            //     const option = document.createElement("option");
-            //     option.value = title;
-            //     option.textContent = title;
-            //     recipientTitleSelect.appendChild(option);
-            // });
-
+            // Handle recipient title selection
             recipientTitleSelect.addEventListener("change", function() {
                 if (this.value === "أخرى") {
                     otherRecipientTitleInput.style.display = "block";
@@ -173,7 +175,43 @@
                     otherRecipientTitleInput.value = ""; // Clear value when hidden
                 }
             });
+
+            // Handle letter type selection
+            letterTypeSelect.addEventListener("change", function() {
+                if (this.value === "خطاب إلحاقي لخطاب سابق من طرفنا") {
+                    previousLetterGroup.style.display = "block";
+                    previousLetterSelect.setAttribute("required", "true");
+                    // Load previous letters
+                    loadPreviousLetters();
+                } else {
+                    previousLetterGroup.style.display = "none";
+                    previousLetterSelect.removeAttribute("required");
+                    previousLetterSelect.value = "";
+                }
+            });
         });
+
+        // Function to load previous letters
+        async function loadPreviousLetters() {
+            try {
+                const letters = await loadSubmissionsData();
+                const previousLetterSelect = document.getElementById("previousLetter");
+                
+                // Clear existing options except the first one
+                previousLetterSelect.innerHTML = '<option value="">اختر الخطاب السابق</option>';
+                
+                // Add letters as options
+                letters.forEach(letter => {
+                    const option = document.createElement("option");
+                    option.value = letter.id;
+                    option.textContent = `${letter.id} - ${letter.recipient} - ${letter.subject || letter.type}`;
+                    option.dataset.content = letter.content || '';
+                    previousLetterSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading previous letters:', error);
+            }
+        }
     </script>
 </body>
 </html>
