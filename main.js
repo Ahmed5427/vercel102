@@ -45,8 +45,17 @@ function renderLettersTable(letters) {
     const tableBody = document.getElementById('lettersTableBody');
     tableBody.innerHTML = '';
     
+    // Check if there's a letter ID to highlight from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const highlightId = urlParams.get('highlight');
+    
     letters.forEach(letter => {
         const row = document.createElement('tr');
+        
+        // Add highlight class if this is the letter to highlight
+        if (highlightId && letter.id === highlightId) {
+            row.classList.add('highlighted-letter');
+        }
         
         // Status color classes
         const reviewStatusClass = getStatusClass(letter.reviewStatus);
@@ -82,6 +91,24 @@ function renderLettersTable(letters) {
         
         tableBody.appendChild(row);
     });
+    
+    // Scroll to highlighted letter if it exists
+    if (highlightId) {
+        setTimeout(() => {
+            const highlightedRow = document.querySelector('.highlighted-letter');
+            if (highlightedRow) {
+                highlightedRow.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+                // Remove highlight after 3 seconds
+                setTimeout(() => {
+                    highlightedRow.classList.remove('highlighted-letter');
+                }, 3000);
+            }
+        }, 500); // Small delay to ensure table is rendered
+    }
 }
 
 function getStatusClass(status) {
