@@ -152,9 +152,18 @@ if (document.getElementById('saveButton')) {
         
         if (result) {
             alert('تم حفظ الخطاب بنجاح!');
-            window.location.href = '/';
+            // Navigate to letter history page with the letter ID to highlight it
+            const letterId = window.generatedLetterData && window.generatedLetterData.ID ? 
+                window.generatedLetterData.ID : 
+                generateUniqueId();
+            window.location.href = `letter-history.html?highlight=${letterId}`;
         }
     });
+}
+
+// Generate unique ID for letters
+function generateUniqueId() {
+    return 'L' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 }
 
 async function generatePDF(content, template) {
