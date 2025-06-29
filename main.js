@@ -26,14 +26,14 @@ if (themeToggle) {
 
 // Letter History Functions
 function loadLetterHistory() {
-    const tableBody = document.getElementById('lettersTableBody');
-    const noData = document.getElementById('noData');
+    const tableBody = document.getElementById("lettersTableBody");
+    const noData = document.getElementById("noData");
     
     // Load data from Google Sheets
     loadSubmissionsData().then(letters => {
         if (letters.length === 0) {
-            tableBody.style.display = 'none';
-            noData.style.display = 'block';
+            tableBody.style.display = "none";
+            noData.style.display = "block";
         } else {
             renderLettersTable(letters);
             setupFilters(letters);
@@ -42,19 +42,19 @@ function loadLetterHistory() {
 }
 
 function renderLettersTable(letters) {
-    const tableBody = document.getElementById('lettersTableBody');
-    tableBody.innerHTML = '';
+    const tableBody = document.getElementById("lettersTableBody");
+    tableBody.innerHTML = "";
     
     // Check if there's a letter ID to highlight from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const highlightId = urlParams.get('highlight');
+    const highlightId = urlParams.get("highlight");
     
     letters.forEach(letter => {
-        const row = document.createElement('tr');
+        const row = document.createElement("tr");
         
         // Add highlight class if this is the letter to highlight
         if (highlightId && letter.id === highlightId) {
-            row.classList.add('highlighted-letter');
+            row.classList.add("highlighted-letter");
         }
         
         // Status color classes
@@ -69,20 +69,20 @@ function renderLettersTable(letters) {
             <td><span class="status-badge ${sendStatusClass}">${letter.sendStatus}</span></td>
             <td>${letter.recipient}</td>
             <td>${letter.subject}</td>
-            <td>${letter.reviewerName || '-'}</td>
-            <td>${letter.reviewNotes || '-'}</td>
+            <td>${letter.reviewerName || "-"}</td>
+            <td>${letter.reviewNotes || "-"}</td>
             <td>
                 <div class="action-buttons">
-                    <button class="action-icon" onclick="reviewLetter('${letter.id}')" title="مراجعة">
+                    <button class="action-icon" onclick="reviewLetter("${letter.id}")" title="مراجعة">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="action-icon" onclick="printLetter('${letter.id}')" title="طباعة">
+                    <button class="action-icon" onclick="printLetter("${letter.id}")" title="طباعة">
                         <i class="fas fa-print"></i>
                     </button>
-                    <button class="action-icon" onclick="downloadLetter('${letter.id}')" title="تحميل">
+                    <button class="action-icon" onclick="downloadLetter("${letter.id}")" title="تحميل">
                         <i class="fas fa-download"></i>
                     </button>
-                    <button class="action-icon delete" onclick="deleteLetter('${letter.id}')" title="حذف">
+                    <button class="action-icon delete" onclick="deleteLetter("${letter.id}")" title="حذف">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -95,16 +95,16 @@ function renderLettersTable(letters) {
     // Scroll to highlighted letter if it exists
     if (highlightId) {
         setTimeout(() => {
-            const highlightedRow = document.querySelector('.highlighted-letter');
+            const highlightedRow = document.querySelector(".highlighted-letter");
             if (highlightedRow) {
                 highlightedRow.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
+                    behavior: "smooth", 
+                    block: "center" 
                 });
                 
                 // Remove highlight after 3 seconds
                 setTimeout(() => {
-                    highlightedRow.classList.remove('highlighted-letter');
+                    highlightedRow.classList.remove("highlighted-letter");
                 }, 3000);
             }
         }, 500); // Small delay to ensure table is rendered
@@ -176,16 +176,16 @@ function downloadLetter(id) {
 }
 
 async function deleteLetter(id) {
-    if (confirm('هل أنت متأكد من حذف هذا الخطاب؟')) {
+    if (confirm("هل أنت متأكد من حذف هذا الخطاب؟")) {
         try {
             // Delete from Google Sheets
             await deleteLetterFromSheet(id);
-            alert('تم حذف الخطاب بنجاح');
-            // Reload the letter history to reflect changes
-            loadLetterHistory();
+            alert("تم حذف الخطاب بنجاح");
+            // Reload the letter history to reflect changes without highlighting
+            window.location.href = "letter-history.html";
         } catch (error) {
-            console.error('Error deleting letter:', error);
-            alert('حدث خطأ أثناء حذف الخطاب');
+            console.error("Error deleting letter:", error);
+            alert("حدث خطأ أثناء حذف الخطاب");
         }
     }
 }
