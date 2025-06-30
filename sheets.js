@@ -170,14 +170,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Populate style dropdown
             const styleSelect = document.getElementById('letterStyle');
-            settings.styles.forEach(style => {
-                const option = document.createElement('option');
-                option.value = style;
-                option.textContent = style;
-                styleSelect.appendChild(option);
-            });
+            if (styleSelect) {
+                settings.styles.forEach(style => {
+                    const option = document.createElement('option');
+                    option.value = style;
+                    option.textContent = style;
+                    styleSelect.appendChild(option);
+                });
+            }
         }
     }
 });
-
-
