@@ -73,16 +73,16 @@ function renderLettersTable(letters) {
             <td>${letter.reviewNotes || "-"}</td>
             <td>
                 <div class="action-buttons">
-                    <button class="action-icon" onclick="reviewLetter("${letter.id}")" title="مراجعة">
+                    <button class="action-icon" onclick="reviewLetter(\'${letter.id}\')" title="مراجعة">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="action-icon" onclick="printLetter("${letter.id}")" title="طباعة">
+                    <button class="action-icon" onclick="printLetter(\'${letter.id}\')" title="طباعة">
                         <i class="fas fa-print"></i>
                     </button>
-                    <button class="action-icon" onclick="downloadLetter("${letter.id}")" title="تحميل">
+                    <button class="action-icon" onclick="downloadLetter(\'${letter.id}\')" title="تحميل">
                         <i class="fas fa-download"></i>
                     </button>
-                    <button class="action-icon delete" onclick="deleteLetter("${letter.id}")" title="حذف">
+                    <button class="action-icon delete" onclick="deleteLetter(\'${letter.id}\')" title="حذف">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
